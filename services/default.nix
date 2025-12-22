@@ -15,9 +15,6 @@ in {
   services.podman = {
     enable = true;
 
-    # Create a "proxy" bridge network similar to the docker-compose example
-    networks.proxy.driver = "bridge";
-
     containers = {
       traefik = {
         image = "traefik:v3.4";
@@ -28,9 +25,6 @@ in {
             RestartSec = "5";
           };
         };
-
-        # Attach to the proxy network
-        network = [ "proxy" ];
 
         # Expose 80/443/8080 on the host
         ports = [
@@ -81,7 +75,6 @@ in {
             RestartSec = "5";
           };
         };
-        network = [ "proxy" ];
 
         labels = {
           "traefik.enable" = "true";
