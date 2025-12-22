@@ -1,6 +1,7 @@
 { config, pkgs, lib, ... }:
 let
   podmanSocket = "/run/user/1000/podman/podman.sock";
+  domain = "c0mpl3x.one";
 in {
   sops = {
     defaultSopsFile = ./secrets.yaml;
@@ -11,9 +12,7 @@ in {
     };
   };
 
-  services.podman = let
-    domain = lib.strings.trim (builtins.readFile config.sops.secrets.domain.path);
-  in {
+  services.podman = {
     enable = true;
 
     # Create a "proxy" bridge network similar to the docker-compose example
