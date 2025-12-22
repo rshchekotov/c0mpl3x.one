@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 let
   domain = builtins.trim (builtins.readFile config.sops.secrets.domain.path);
+  podmanSocket = "/run/user/${toString config.home.uid}/podman/podman.sock";
 in {
   sops = {
     defaultSopsFile = ./secrets.yaml;
@@ -42,7 +43,7 @@ in {
         # For rootless Podman this is usually under $XDG_RUNTIME_DIR
         volumes = [
           # adjust path if your podman.sock is elsewhere
-          "${config.xdg.runtimeDir}/podman/podman.sock:/var/run/docker.sock:ro"
+          "${podmanSocket}:/var/run/docker.sock:ro"
           # optional: bind dynamic config / certs similar to the compose example
           # "${config.home.homeDirectory}/traefik/certs:/certs:ro"
           # "${config.home.homeDirectory}/traefik/dynamic:/etc/traefik/dynamic:ro"
