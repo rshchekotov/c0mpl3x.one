@@ -15,11 +15,7 @@ in {
     enable = true;
 
     # Create a "proxy" bridge network similar to the docker-compose example
-    networks = {
-      proxy = {
-        driver = "bridge";
-      };
-    };
+    networks.proxy.driver = "bridge";
 
     containers = {
       traefik = {
@@ -48,7 +44,8 @@ in {
         ];
 
         # Command flags from the Traefik docs example
-        cmd = [
+        exec = [
+          "traefik"
           "--api.insecure=false"
           "--api.dashboard=true"
           "--providers.docker=true"
