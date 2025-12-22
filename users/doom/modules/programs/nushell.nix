@@ -8,7 +8,7 @@
 
       def hms [] {
         cd ~/devops
-        nix build .#homeConfigurations."doom".activationPackage
+        nix build --impure .#homeConfigurations."doom".activationPackage
         ./result/activate
       }
     '';
