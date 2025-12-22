@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... }:
 let
-  domain = builtins.trim (builtins.readFile config.sops.secrets.domain.path);
+  domain = lib.strings.trim (builtins.readFile config.sops.secrets.domain.path);
   podmanSocket = "/run/user/1000/podman/podman.sock";
 in {
   sops = {
