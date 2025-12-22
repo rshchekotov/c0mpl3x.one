@@ -1,1 +1,5 @@
+# Build Files
+result
+
+# Environment Secrets
 **/*.env
