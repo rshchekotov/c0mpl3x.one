@@ -24,7 +24,7 @@ in {
         restartPolicy = "unless-stopped";
 
         # Attach to the proxy network
-        networks = [ "proxy" ];
+        network = [ "proxy" ];
 
         # Expose 80/443/8080 on the host
         ports = [
@@ -70,7 +70,7 @@ in {
       whoami = {
         image = "traefik/whoami";
         restartPolicy = "unless-stopped";
-        networks = [ "proxy" ];
+        network = [ "proxy" ];
 
         labels = {
           "traefik.enable" = "true";
