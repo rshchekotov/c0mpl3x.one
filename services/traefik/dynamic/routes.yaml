@@ -1,0 +1,21 @@
+http:
+  routers:
+    dashboard:
+      rule: "Host(`dashboard.example.com`)"
+      entryPoints:
+        - websecure
+      service: api@internal
+      tls: {}
+
+    whoami:
+      rule: "Host(`whoami.example.com`)"
+      entryPoints:
+        - websecure
+      service: whoami
+      tls: {}
+
+  services:
+    whoami:
+      loadBalancer:
+        servers:
+          - url: "http://whoami:80"
