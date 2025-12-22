@@ -26,13 +26,13 @@ in {
         };
 
         # For now: only HTTP, on 8080
-        ports = [ "8080:8080" ];
+        ports = [ "9090:9090" ];
 
         # NO volumes, NO docker provider, NO file provider yet
         exec = lib.concatStringsSep " " [
           "traefik"
           "--api.insecure=true"             # expose dashboard on :8080/dashboard/
-          "--entryPoints.web.address=:8080"
+          "--entryPoints.web.address=:9090"
           "--log.level=DEBUG"
         ];
       };
