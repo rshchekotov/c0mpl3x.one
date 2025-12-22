@@ -27,3 +27,17 @@ There should be numerous services available on the server.
 First I'd like there to be Traefik for a Reverse Proxy,
 Authentik for an Authentication service for all the following services.
 I would also like there to be a Headscale instance behind Authentication.
+
+### Secret Maintenance
+
+Based on [Michael Stapelberg's Blog](https://michael.stapelberg.ch/posts/2025-08-24-secret-management-with-sops-nix) I decided to use [sops-nix](https://github.com/Mic92/sops-nix#use-with-home-manager) with [ssh-to-age](https://github.com/Mic92/ssh-to-age) to manage secrets within Git.
+
+### Containerization
+
+Containers are managed with Podman Quadlets (SystemD Units):
+[GH Docs](https://github.com/containers/podman/blob/main/docs/source/markdown/podman-systemd.unit.5.md).
+
+As quadlets are by nature just expansions to SystemD Units and Services
+the following docs are also relevant:
+- [SystemD Unit](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#)
+- [SystemD Service](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html#)

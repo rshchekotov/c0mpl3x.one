@@ -20,8 +20,13 @@ in {
     containers = {
       traefik = {
         image = "traefik:v3.4";
-        # Standard restart behavior
-        restartPolicy = "unless-stopped";
+
+        extraConfig = {
+          Service = {
+            Restart = "on-failure";
+            RestartSec = "5";
+          };
+        };
 
         # Attach to the proxy network
         network = [ "proxy" ];
@@ -69,7 +74,12 @@ in {
 
       whoami = {
         image = "traefik/whoami";
-        restartPolicy = "unless-stopped";
+        extraConfig = {
+          Service = {
+            Restart = "on-failure";
+            RestartSec = "5";
+          };
+        };
         network = [ "proxy" ];
 
         labels = {
