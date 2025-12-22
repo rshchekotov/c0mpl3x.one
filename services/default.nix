@@ -44,8 +44,8 @@ in {
           "--api.dashboard=true"
           "--providers.docker=false"
           "--providers.file.directory=/etc/traefik/dynamic"
-          "--entryPoints.web.address=:8080"
-          "--entryPoints.websecure.address=:8443"
+          "--entryPoints.web.address=:80"
+          "--entryPoints.websecure.address=:443"
           "--entryPoints.websecure.http.tls=true"
         ];
       };
