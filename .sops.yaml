@@ -1,0 +1,11 @@
+keys:
+  - &local_doom
+    age1pgk2enc9kusyxff7crq7f2vgzl4yat3ndrzsykmsxv5eaz4z794scakdl3
+  - &remote_doom
+    age1hqh45epwu895fmnqk38ceqcu0l56tz9ad8l5zwxdmxhdc5e7a5lqg5n8gr
+creation_rules:
+  - path_regex: services/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+    - age:
+      - *local_doom
+      - *remote_doom
