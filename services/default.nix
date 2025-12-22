@@ -25,28 +25,15 @@ in {
           };
         };
 
-        # Expose 80/443/8080 on the host
-        ports = [
-          "80:80"
-          "443:443"
-          "8080:8080"
-        ];
+        # For now: only HTTP, on 8080
+        ports = [ "8080:8080" ];
 
-
-        volumes = [
-          "${./traefik/dynamic}:/etc/traefik/dynamic:ro"
-        ];
-
-        # Command flags from the Traefik docs example
+        # NO volumes, NO docker provider, NO file provider yet
         exec = lib.concatStringsSep " " [
           "traefik"
-          "--api.insecure=false"
-          "--api.dashboard=true"
-          "--providers.docker=false"
-          "--providers.file.directory=/etc/traefik/dynamic"
-          "--entryPoints.web.address=:80"
-          "--entryPoints.websecure.address=:443"
-          "--entryPoints.websecure.http.tls=true"
+          "--api.insecure=true"             # expose dashboard on :8080/dashboard/
+          "--entryPoints.web.address=:8080"
+          "--log.level=DEBUG"
         ];
       };
 
@@ -58,6 +45,7 @@ in {
             RestartSec = "5";
           };
         };
+        ports = [ "8081:80" ];
       };
     };
   };
