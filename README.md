@@ -19,6 +19,9 @@ with there being a `default.nix` to gather all programs,
 as well as `bash.nix` and `nushell.nix` to enable the nushell and to launch
 it from bash, via `initExtra = "exec nu";`.
 
+- git
+- less
+
 *I will expand this section as there will be more needs for user/dx packages.*
 
 ## Infrastructure
