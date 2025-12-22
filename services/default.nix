@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 let
   domain = builtins.trim (builtins.readFile config.sops.secrets.domain.path);
   podmanSocket = "/run/user/1000/podman/podman.sock";
@@ -50,7 +50,7 @@ in {
         ];
 
         # Command flags from the Traefik docs example
-        exec = [
+        exec = lib.concatStringsSep " " [
           "traefik"
           "--api.insecure=false"
           "--api.dashboard=true"
