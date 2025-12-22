@@ -43,7 +43,7 @@ in {
         # For rootless Podman this is usually under $XDG_RUNTIME_DIR
         volumes = [
           # adjust path if your podman.sock is elsewhere
-          "${podmanSocket}:/var/run/docker.sock:ro"
+          # "${podmanSocket}:/var/run/docker.sock:ro"
           # optional: bind dynamic config / certs similar to the compose example
           # "${config.home.homeDirectory}/traefik/certs:/certs:ro"
           # "${config.home.homeDirectory}/traefik/dynamic:/etc/traefik/dynamic:ro"
