@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   domain = builtins.trim (builtins.readFile config.sops.secrets.domain.path);
-  podmanSocket = "/run/user/${toString config.home.uid}/podman/podman.sock";
+  podmanSocket = "/run/user/1000/podman/podman.sock";
 in {
   sops = {
     defaultSopsFile = ./secrets.yaml;
