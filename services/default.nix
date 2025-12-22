@@ -1,8 +1,31 @@
 { config, pkgs, lib, ... }:
 let
   podmanSocket = "/run/user/1000/podman/podman.sock";
+  podmanApiPort = "12345";
   domain = "c0mpl3x.one";
 in {
+  systemd.user.services.podman-api = {
+    Unit = {
+      Description = "Rootless Podman API service";
+      After = [ "default.target" ];
+    };
+
+    Service = {
+      # Keep the service running
+      Restart = "always";
+      RestartSec = 5;
+
+      # Podman API server; --time=0 means never auto-exit
+      ExecStart = ''
+        ${pkgs.podman}/bin/podman system service --time=0 tcp:127.0.0.1:${podmanApiPort}
+      '';
+    };
+
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
+
   sops = {
     defaultSopsFile = ./secrets.yaml;
     age.keyFile = "/home/${config.home.username}/.config/sops/age/keys.txt";
@@ -50,7 +73,8 @@ in {
           "--api.dashboard=true"
           "--providers.docker=true"
           "--providers.docker.exposedbydefault=false"
-          "--providers.docker.network=proxy"
+          "--providers.docker.network=podman"
+          "--providers.docker.endpoint=tcp://127.0.0.1:${podmanApiPort}"
           "--providers.file.directory=/etc/traefik/dynamic"
           "--entryPoints.web.address=:80"
           "--entryPoints.websecure.address=:443"
