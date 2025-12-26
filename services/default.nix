@@ -20,7 +20,7 @@ in {
         };
 
         # For now: only HTTP, on 8080
-        ports = [ "80:80" ];
+        ports = [ "443:443" ];
 
         volumes = [
           "${./traefik/dynamic}:/etc/traefik/dynamic:ro"
