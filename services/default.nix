@@ -64,7 +64,7 @@ in {
 
         # The default command for the headscale container is usually "headscale serve"
         # but sometimes you need to be explicit.
-        exec = "headscale serve"; 
+        exec = "serve"; 
       };
     };
   };
