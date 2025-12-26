@@ -32,7 +32,7 @@ http:
       tls:
         certResolver: myresolver
 
-    headscale:
+    headscale-metrics:
       rule: "Host(`headscale-metrics.c0mpl3x.one`)"
       entryPoints:
         - websecure
