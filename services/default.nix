@@ -25,6 +25,7 @@ in {
         ports = [
           "80:80"
           "443:443"
+          "9090:443"
         ];
 
         volumes = [
@@ -45,6 +46,7 @@ in {
           "--entryPoints.web.http.redirections.entryPoint.scheme=https"
           
           "--entryPoints.websecure.address=:443"
+          "--entryPoints.headscale_secure.address=:9090"
           
           # --- Let's Encrypt (Resolver) ---
           "--certificatesResolvers.myresolver.acme.email=webmaster@c0mpl3x.one"
@@ -75,7 +77,7 @@ in {
         # Traefik will proxy to localhost:8080
         ports = [
           "8080:8080"
-          "9090:9090"
+          "9091:9090"
         ];
 
         volumes = [
