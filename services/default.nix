@@ -2,9 +2,11 @@
 let
   domain = "c0mpl3x.one";
   headscaleDir = "${config.xdg.configHome}/headscale";
+  acmeDir = "${config.xdg.configHome}/traefik/acme";
 in {
-  home.activation.createHeadscaleDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.createDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
     mkdir -p ${headscaleDir}/config ${headscaleDir}/data
+    mkdir -p ${acmeDir}
   '';
 
   services.podman = {
@@ -20,19 +22,35 @@ in {
         };
 
         # For now: only HTTP, on 8080
-        ports = [ "443:443" ];
+        ports = [
+          "80:80"
+          "443:443"
+        ];
 
         volumes = [
           "${./traefik/dynamic}:/etc/traefik/dynamic:ro"
+          "${acmeDir}:/etc/traefik/acme"
         ];
 
-        # NO volumes, NO docker provider, NO file provider yet
         exec = lib.concatStringsSep " " [
           "traefik"
           "--api.insecure=true"
           "--providers.file.directory=/etc/traefik/dynamic"
           "--providers.file.watch=true"
-          "--entryPoints.web.address=:80" # Matches container-side port
+          
+          # --- EntryPoints ---
+          "--entryPoints.web.address=:80"
+          # Global Redirect HTTP -> HTTPS
+          "--entryPoints.web.http.redirections.entryPoint.to=websecure"
+          "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+          
+          "--entryPoints.websecure.address=:443"
+          
+          # --- Let's Encrypt (Resolver) ---
+          "--certificatesResolvers.myresolver.acme.email=webmaster@c0mpl3x.one"
+          "--certificatesResolvers.myresolver.acme.storage=/etc/traefik/acme/acme.json"
+          "--certificatesResolvers.myresolver.acme.httpChallenge.entryPoint=web"
+          
           "--log.level=DEBUG"
         ];
       };
@@ -55,7 +73,10 @@ in {
         
         # Expose Headscale port to host (e.g. 8080 on host -> 8080 in container)
         # Traefik will proxy to localhost:8080
-        ports = [ "8080:8080" ];
+        ports = [
+          "8080:8080"
+          "9090:9090"
+        ];
 
         volumes = [
           "${headscaleDir}/config:/etc/headscale"
