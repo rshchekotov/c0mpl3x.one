@@ -32,6 +32,14 @@ http:
       tls:
         certResolver: myresolver
 
+    headscale:
+      rule: "Host(`headscale-metrics.c0mpl3x.one`)"
+      entryPoints:
+        - websecure
+      service: headscale-metrics
+      tls:
+        certResolver: myresolver
+
   services:
     whoami:
       loadBalancer:
@@ -42,3 +50,8 @@ http:
       loadBalancer:
         servers:
           - url: "http://host.containers.internal:8080"
+
+    headscale-metrics:
+      loadBalancer:
+        servers:
+          - url: "http://host.containers.internal:9090/metrics"
