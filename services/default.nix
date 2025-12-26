@@ -20,7 +20,7 @@ in {
         };
 
         # For now: only HTTP, on 8080
-        ports = [ "9090:9090" ];
+        ports = [ "80:80" ];
 
         volumes = [
           "${./traefik/dynamic}:/etc/traefik/dynamic:ro"
@@ -32,7 +32,7 @@ in {
           "--api.insecure=true"
           "--providers.file.directory=/etc/traefik/dynamic"
           "--providers.file.watch=true"
-          "--entryPoints.web.address=:9090" # Matches container-side port
+          "--entryPoints.web.address=:80" # Matches container-side port
           "--log.level=DEBUG"
         ];
       };
@@ -43,7 +43,7 @@ in {
           Restart = "on-failure";
           RestartSec = "5";
         };
-        ports = [ "8081:80" ];
+        ports = [ "8081:8081" ];
       };
 
       headscale = {
