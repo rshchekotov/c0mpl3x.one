@@ -44,3 +44,18 @@ As quadlets are by nature just expansions to SystemD Units and Services
 the following docs are also relevant:
 - [SystemD Unit](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#)
 - [SystemD Service](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html#)
+
+### Tailscale Exit Node
+IP Forwarding
+```
+echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+sudo sysctl -p /etc/sysctl.d/99-tailscale.conf
+```
+Tailscale Server
+```
+sudo tailscale up \
+  --login-server=https://headscale.c0mpl3x.one \
+  --advertise-exit-node \
+  --accept-dns=false
+```
