@@ -14,8 +14,20 @@ http:
       service: whoami
       tls: {}
 
+    headscale:
+      rule: "Host(`headscale.c0mpl3x.one`)"
+      entryPoints:
+        - web
+      service: headscale
+      tls: {}
+
   services:
     whoami:
       loadBalancer:
         servers:
-          - url: "http://whoami:80"
+          - url: "http://host.containers.internal:8081"
+
+    headscale:
+      loadBalancer:
+        servers:
+          - url: "http://host.containers.internal:8080"
