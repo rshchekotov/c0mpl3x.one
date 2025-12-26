@@ -1,14 +1,14 @@
 http:
   routers:
     dashboard:
-      rule: "Host(`dashboard.example.com`)"
+      rule: "Host(`dashboard.c0mpl3x.one`)"
       entryPoints:
         - websecure
       service: api@internal
       tls: {}
 
     whoami:
-      rule: "Host(`whoami.example.com`)"
+      rule: "Host(`whoami.c0mpl3x.one`)"
       entryPoints:
         - websecure
       service: whoami

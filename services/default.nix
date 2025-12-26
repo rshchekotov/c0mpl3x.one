@@ -2,15 +2,6 @@
 let
   domain = "c0mpl3x.one";
 in {
-  sops = {
-    defaultSopsFile = ./secrets.yaml;
-    age.keyFile = "/home/${config.home.username}/.config/sops/age/keys.txt";
-
-    secrets.domain = {
-      path = "${config.sops.defaultSymlinkPath}/domain";
-    };
-  };
-
   services.podman = {
     enable = true;
 
