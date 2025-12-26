@@ -43,7 +43,7 @@ in {
           Restart = "on-failure";
           RestartSec = "5";
         };
-        ports = [ "8081:8081" ];
+        ports = [ "8081:80" ];
       };
 
       headscale = {

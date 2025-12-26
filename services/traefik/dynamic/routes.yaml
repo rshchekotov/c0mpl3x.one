@@ -1,5 +1,11 @@
 http:
   routers:
+    root:
+        rule: "Host(`c0mpl3x.one`)"
+        entryPoints:
+          - web
+        service: whoami
+        tls: {}
     dashboard:
       rule: "Host(`dashboard.c0mpl3x.one`)"
       entryPoints:
