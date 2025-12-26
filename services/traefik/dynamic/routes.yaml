@@ -1,31 +1,36 @@
 http:
   routers:
     root:
-        rule: "Host(`c0mpl3x.one`)"
-        entryPoints:
-          - web
-        service: whoami
-        tls: {}
+      rule: "Host(`c0mpl3x.one`)"
+      entryPoints:
+        - websecure
+      service: whoami
+      tls:
+        certResolver: myresolver
+
     dashboard:
       rule: "Host(`dashboard.c0mpl3x.one`)"
       entryPoints:
-        - web
+        - websecure
       service: api@internal
-      tls: {}
+      tls:
+        certResolver: myresolver
 
     whoami:
       rule: "Host(`whoami.c0mpl3x.one`)"
       entryPoints:
-        - web
+        - websecure
       service: whoami
-      tls: {}
+      tls:
+        certResolver: myresolver
 
     headscale:
       rule: "Host(`headscale.c0mpl3x.one`)"
       entryPoints:
-        - web
+        - websecure
       service: headscale
-      tls: {}
+      tls:
+        certResolver: myresolver
 
   services:
     whoami:
