@@ -31,7 +31,7 @@ http:
     whoami:
       loadBalancer:
         servers:
-          - url: "http://host.containers.internal:8081"
+          - url: "http://host.containers.internal:80"
 
     headscale:
       loadBalancer:
