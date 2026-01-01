@@ -144,6 +144,14 @@ resource "docker_container" "authentik_server" {
     value = "websecure"
   }
   labels {
+    label = "traefik.http.routers.authentik.tls"
+    value = "true"
+  }
+  labels {
+    label = "traefik.http.routers.authentik.tls.certresolver"
+    value = "myresolver"
+  }
+  labels {
     label = "traefik.http.services.authentik.loadbalancer.server.port"
     value = "9000"
   }
@@ -232,6 +240,14 @@ resource "docker_container" "headscale" {
     value = "Host(`vpn.c0mpl3x.one`)"
   }
   labels {
+    label = "traefik.http.routers.headscale.tls"
+    value = "true"
+  }
+  labels {
+    label = "traefik.http.routers.headscale.tls.certresolver"
+    value = "myresolver"
+  }
+  labels {
     label = "traefik.http.services.headscale.loadbalancer.server.port"
     value = "8080"
   }
@@ -270,6 +286,11 @@ resource "docker_container" "traefik" {
     container_path = "/var/run/docker.sock"
     read_only      = true
   }
+
+  volumes {
+    host_path      = "/opt/infra/traefik/acme.json"
+    container_path = "/acme.json"
+  }
   
   # Basic Command (assuming you want Let's Encrypt later)
   command = [
@@ -285,6 +306,11 @@ resource "docker_container" "traefik" {
     # Redirect HTTP -> HTTPS
     "--entrypoints.web.http.redirections.entrypoint.to=websecure",
     "--entrypoints.web.http.redirections.entrypoint.scheme=https",
+    # Certs
+    "--certificatesresolvers.myresolver.acme.httpchallenge=true",
+    "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web",
+    "--certificatesresolvers.myresolver.acme.email=doom@c0mpl3x.one",
+    "--certificatesresolvers.myresolver.acme.storage=/acme.json"
   ]
 
   lifecycle {
