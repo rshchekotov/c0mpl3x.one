@@ -22,6 +22,11 @@ resource "random_password" "pg_password" {
   special = false
 }
 
+resource "random_password" "proxy_password" {
+  length  = 12
+  special = false
+}
+
 resource "random_password" "headplane_secret" {
   length  = 32
   special = false
@@ -446,4 +451,52 @@ resource "docker_container" "traefik" {
   lifecycle {
     ignore_changes = [ pid_mode, ulimit ]
   }
+}
+
+resource "docker_image" "shadowsocks" {
+  name = "ghcr.io/shadowsocks/ss-rust:latest"
+}
+
+resource "docker_container" "shadowsocks" {
+  name    = "shadowsocks"
+  image   = docker_image.shadowsocks.image_id
+  restart = "unless-stopped"
+  
+  # Isolated Network? 
+  # Actually, it needs NO network access to your other containers.
+  # It just needs to talk to the Internet.
+  # The default bridge is fine.
+
+  # Expose a RANDOM-looking port (e.g., 443, 8443, or 9000).
+  # If you use 443, it blends in with HTTPS traffic (very effective).
+  # BUT Traefik is using 443.
+  # Use 8443 or a high port like 51820 (Wireguard-ish).
+  ports {
+    internal = 8388
+    external = 8443 # External Port you connect to
+    protocol = "tcp"
+  }
+  
+  # Also UDP for DNS tunneling
+  ports {
+    internal = 8388
+    external = 8443
+    protocol = "udp"
+  }
+
+  env = [
+    "SS_PASSWORD=${random_password.proxy_password.result}",
+    "SS_METHOD=aes-256-gcm",
+    "SS_TIMEOUT=300",
+    "SS_DNS=1.1.1.1"
+  ]
+  
+  # Shadowsocks-rust usually takes config via arguments or JSON.
+  # The docker image entrypoint handles flags nicely.
+  command = [
+    "ssserver",
+    "-s", "0.0.0.0:8388",
+    "-k", "${random_password.proxy_password.result}",
+    "-m", "aes-256-gcm"
+  ]
 }
