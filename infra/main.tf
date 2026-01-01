@@ -22,11 +22,6 @@ resource "random_password" "pg_password" {
   special = false
 }
 
-resource "random_password" "proxy_password" {
-  length  = 12
-  special = false
-}
-
 resource "random_password" "headplane_secret" {
   length  = 32
   special = false
@@ -392,6 +387,10 @@ resource "docker_container" "headplane" {
     label = "traefik.http.routers.headplane.middlewares"
     value = "headplane-root-redirect"
   }
+
+  lifecycle {
+    ignore_changes = [ pid_mode, ulimit ]
+  }
 }
 
 # --- 4. Traefik (The Gateway) ---
@@ -454,7 +453,7 @@ resource "docker_container" "traefik" {
 }
 
 resource "docker_image" "shadowsocks" {
-  name = "ghcr.io/shadowsocks/ss-rust:latest"
+  name = "ghcr.io/shadowsocks/ssserver-rust:v1.24.0"
 }
 
 resource "docker_container" "shadowsocks" {
@@ -484,19 +483,17 @@ resource "docker_container" "shadowsocks" {
     protocol = "udp"
   }
 
-  env = [
-    "SS_PASSWORD=${random_password.proxy_password.result}",
-    "SS_METHOD=aes-256-gcm",
-    "SS_TIMEOUT=300",
-    "SS_DNS=1.1.1.1"
-  ]
-  
-  # Shadowsocks-rust usually takes config via arguments or JSON.
-  # The docker image entrypoint handles flags nicely.
+  volumes {
+    host_path      = "/opt/infra/shadowsocks/config.json"
+    container_path = "/config.json"
+    read_only      = true
+  }
+
   command = [
-    "ssserver",
-    "-s", "0.0.0.0:8388",
-    "-k", "${random_password.proxy_password.result}",
-    "-m", "aes-256-gcm"
+    "ssserver", "-c", "/config.json"
   ]
+
+  lifecycle {
+    ignore_changes = [ pid_mode, ulimit ]
+  }
 }
