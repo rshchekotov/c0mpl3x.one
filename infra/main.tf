@@ -49,6 +49,10 @@ resource "docker_volume" "headscale_data" {
   name = "headscale_data"
 }
 
+resource "docker_volume" "headplane_data" {
+  name = "headplane_data"
+}
+
 resource "docker_volume" "authentik_media" {
   name = "authentik_media"
 }
@@ -231,6 +235,13 @@ resource "docker_container" "headscale" {
 
   command = ["serve"]
 
+  # --- Internal Discovery ---
+  labels {
+    label = "me.tale.headplane.target"
+    value = "headscale"
+  }
+
+  # --- Traefik Core ---
   labels {
     label = "traefik.enable"
     value = "true"
@@ -238,6 +249,10 @@ resource "docker_container" "headscale" {
   labels {
     label = "traefik.http.routers.headscale.rule"
     value = "Host(`vpn.c0mpl3x.one`)"
+  }
+  labels {
+    label = "traefik.http.routers.headscale.entrypoints"
+    value = "websecure"
   }
   labels {
     label = "traefik.http.routers.headscale.tls"
@@ -251,10 +266,117 @@ resource "docker_container" "headscale" {
     label = "traefik.http.services.headscale.loadbalancer.server.port"
     value = "8080"
   }
+
+  # --- CORS Middleware (Crucial for Headplane) ---
+  labels {
+    label = "traefik.http.routers.headscale.middlewares"
+    value = "cors"
+  }
+  labels {
+    label = "traefik.http.middlewares.cors.headers.accesscontrolallowheaders"
+    value = "*"
+  }
+  labels {
+    label = "traefik.http.middlewares.cors.headers.accesscontrolallowmethods"
+    value = "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+  }
+  labels {
+    # Allow the Admin Subdomain to make requests to the VPN domain
+    label = "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist"
+    value = "https://admin.vpn.c0mpl3x.one"
+  }
+  labels {
+    label = "traefik.http.middlewares.cors.headers.accesscontrolmaxage"
+    value = "100"
+  }
+  labels {
+    label = "traefik.http.middlewares.cors.headers.addvaryheader"
+    value = "true"
+  }
   # Note: Headscale doesn't need Traefik middleware for Auth,
   # because Headscale does the Auth internally via OIDC.
   lifecycle {
     ignore_changes = [ pid_mode, ulimit ]
+  }
+}
+
+# --- 3.5 Headplane ---
+resource "docker_image" "headplane_img" {
+  name = "ghcr.io/tale/headplane:latest"
+  keep_locally = true
+}
+
+resource "docker_container" "headplane" {
+  name    = "headplane"
+  image   = docker_image.headplane_img.image_id
+  restart = "unless-stopped"
+  networks_advanced {
+    name = docker_network.private_net.name
+  }
+
+  volumes {
+    host_path      = "/opt/infra/headplane/config.yaml"
+    container_path = "/etc/headplane/config.yaml"
+  }
+  volumes {
+    # Headplane needs its own data directory
+    volume_name    = docker_volume.headplane_data.name
+    container_path = "/var/lib/headplane"
+  }
+  
+  # Headplane needs to see Headscale's config to manage it
+  volumes {
+    host_path      = "/opt/infra/headscale/config"
+    container_path = "/etc/headscale"
+    read_only      = false # Headplane writes to this
+  }
+  
+  # Access to Docker Socket to restart Headscale or generate keys
+  volumes {
+    host_path      = "/run/podman/podman.sock"
+    container_path = "/var/run/docker.sock"
+    read_only      = true
+  }
+
+  # --- Traefik Routing ---
+  labels {
+    label = "traefik.enable"
+    value = "true"
+  }
+  labels {
+    label = "traefik.http.routers.headplane.rule"
+    value = "Host(`admin.vpn.c0mpl3x.one`)"
+  }
+  labels {
+    label = "traefik.http.routers.headplane.entrypoints"
+    value = "websecure"
+  }
+  labels {
+    label = "traefik.http.routers.headplane.tls"
+    value = "true"
+  }
+  labels {
+    label = "traefik.http.routers.headplane.tls.certresolver"
+    value = "myresolver"
+  }
+  labels {
+    label = "traefik.http.services.headplane.loadbalancer.server.port"
+    value = "3000"
+  }
+
+  # --- Root Redirect Middleware (Optional but nice) ---
+  # If you visit "https://admin.vpn...", go straight to "/admin"
+  labels {
+    label = "traefik.http.middlewares.headplane-root-redirect.redirectregex.regex"
+    value = "^https?://([^/]+)/?$"
+  }
+  labels {
+    label = "traefik.http.middlewares.headplane-root-redirect.redirectregex.replacement"
+    value = "https://$1/admin"
+  }
+  labels {
+    label = "traefik.http.routers.headplane.middlewares"
+    value = "headplane-root-redirect"
   }
 }
 
