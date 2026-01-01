@@ -30,6 +30,10 @@ resource "random_password" "authentik_secret" {
 resource "docker_network" "private_net" {
   name   = "doom-internal"
   driver = "bridge"
+
+  lifecycle {
+    ignore_changes = [ ipam_options ]
+  }
 }
 
 # --- 0.5. Volumes ---
@@ -50,10 +54,14 @@ resource "docker_volume" "authentik_media" {
 }
 
 # --- 1. Database (Postgres) & Redis for Authentik ---
+resource "docker_image" "postgres_img" {
+  name = "docker.io/library/postgres:12-alpine"
+  keep_locally = true
+}
 
 resource "docker_container" "postgres" {
   name    = "authentik_db"
-  image   = "postgres:12-alpine"
+  image   = docker_image.postgres_img.image_id
   restart = "unless-stopped"
   networks_advanced {
     name = docker_network.private_net.name
@@ -69,11 +77,20 @@ resource "docker_container" "postgres" {
     volume_name    = docker_volume.pg_data.name
     container_path = "/var/lib/postgresql/data"
   }
+
+  lifecycle {
+    ignore_changes = [ pid_mode, ulimit ]
+  }
+}
+
+resource "docker_image" "valkey_img" {
+  name = "docker.io/valkey/valkey:9-alpine"
+  keep_locally = true
 }
 
 resource "docker_container" "redis" {
   name    = "authentik_redis"
-  image   = "valkey/valkey:9-alpine"
+  image   = docker_image.valkey_img.image_id
   restart = "unless-stopped"
   networks_advanced {
     name = docker_network.private_net.name
@@ -82,10 +99,13 @@ resource "docker_container" "redis" {
     volume_name    = docker_volume.redis_data.name
     container_path = "/data"
   }
+
+  lifecycle {
+    ignore_changes = [ pid_mode, ulimit ]
+  }
 }
 
 # --- 2. Authentik Server & Worker ---
-
 resource "docker_image" "authentik_img" {
   name = "ghcr.io/goauthentik/server:2025.12.0-rc2"
   keep_locally = true
@@ -135,6 +155,10 @@ resource "docker_container" "authentik_server" {
     volume_name      = docker_volume.authentik_media.name
     container_path = "/media"
   }
+
+  lifecycle {
+    ignore_changes = [ pid_mode, ulimit ]
+  }
 }
 
 resource "docker_container" "authentik_worker" {
@@ -167,13 +191,21 @@ resource "docker_container" "authentik_worker" {
   }
 
   command = ["worker"]
+
+  lifecycle {
+    ignore_changes = [ pid_mode, ulimit ]
+  }
 }
 
 # --- 3. Headscale (with OIDC Config) ---
+resource "docker_image" "headscale_img" {
+  name = "docker.io/headscale/headscale:latest"
+  keep_locally = true
+}
 
 resource "docker_container" "headscale" {
   name    = "headscale"
-  image   = "headscale/headscale:latest"
+  image   = docker_image.headscale_img.image_id
   restart = "unless-stopped"
   networks_advanced {
     name = docker_network.private_net.name
@@ -205,13 +237,20 @@ resource "docker_container" "headscale" {
   }
   # Note: Headscale doesn't need Traefik middleware for Auth,
   # because Headscale does the Auth internally via OIDC.
+  lifecycle {
+    ignore_changes = [ pid_mode, ulimit ]
+  }
 }
 
 # --- 4. Traefik (The Gateway) ---
+resource "docker_image" "traefik" {
+  name = "docker.io/library/traefik:v3.0"  # Explicit registry
+  keep_locally = true
+}
 
 resource "docker_container" "traefik" {
   name    = "traefik"
-  image   = "traefik:v3.0"
+  image   = docker_image.traefik.image_id
   restart = "unless-stopped"
   networks_advanced {
     name = docker_network.private_net.name
@@ -243,4 +282,8 @@ resource "docker_container" "traefik" {
     "--entrypoints.web.http.redirections.entrypoint.to=websecure",
     "--entrypoints.web.http.redirections.entrypoint.scheme=https",
   ]
+
+  lifecycle {
+    ignore_changes = [ pid_mode, ulimit ]
+  }
 }
