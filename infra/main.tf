@@ -288,8 +288,8 @@ resource "docker_container" "traefik" {
   }
 
   volumes {
-    host_path      = "/opt/infra/traefik/acme.json"
-    container_path = "/acme.json"
+    host_path      = "/opt/infra/traefik/acme"
+    container_path = "/etc/traefik/acme"
   }
   
   # Basic Command (assuming you want Let's Encrypt later)
@@ -307,10 +307,9 @@ resource "docker_container" "traefik" {
     "--entrypoints.web.http.redirections.entrypoint.to=websecure",
     "--entrypoints.web.http.redirections.entrypoint.scheme=https",
     # Certs
-    "--certificatesresolvers.myresolver.acme.httpchallenge=true",
-    "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web",
+    "--certificatesResolvers.myresolver.acme.httpChallenge.entryPoint=web",
     "--certificatesresolvers.myresolver.acme.email=doom@c0mpl3x.one",
-    "--certificatesresolvers.myresolver.acme.storage=/acme.json"
+    "--certificatesresolvers.myresolver.acme.storage=/etc/traefik/acme/acme.json"
   ]
 
   lifecycle {
