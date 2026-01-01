@@ -273,6 +273,10 @@ resource "docker_container" "traefik" {
   
   # Basic Command (assuming you want Let's Encrypt later)
   command = [
+    # Log Stuff
+    "--log.level=DEBUG",
+    "--accesslog=true",
+    # General Stuff
     "--api.insecure=false",
     "--providers.docker=true",
     "--providers.docker.exposedbydefault=false",
