@@ -22,6 +22,11 @@ resource "random_password" "pg_password" {
   special = false
 }
 
+resource "random_password" "headplane_secret" {
+  length  = 32
+  special = false
+}
+
 resource "random_password" "authentik_secret" {
   length  = 50
   special = false
@@ -313,6 +318,10 @@ resource "docker_container" "headplane" {
   networks_advanced {
     name = docker_network.private_net.name
   }
+
+  env = [
+    "HEADPLANE_SERVER__COOKIE_SECRET=${random_password.headplane_secret.result}"
+  ]
 
   volumes {
     host_path      = "/opt/infra/headplane/config.yaml"
