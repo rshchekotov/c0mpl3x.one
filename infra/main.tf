@@ -55,7 +55,7 @@ resource "docker_volume" "authentik_media" {
 
 # --- 1. Database (Postgres) & Redis for Authentik ---
 resource "docker_image" "postgres_img" {
-  name = "docker.io/library/postgres:12-alpine"
+  name = "docker.io/library/postgres:18-alpine"
   keep_locally = true
 }
 
