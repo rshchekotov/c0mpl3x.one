@@ -189,7 +189,7 @@ resource "docker_container" "headscale" {
     container_path = "/var/lib/headscale"
   }
 
-  command = ["headscale", "serve"]
+  command = ["serve"]
 
   labels {
     label = "traefik.enable"
