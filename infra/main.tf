@@ -452,48 +452,26 @@ resource "docker_container" "traefik" {
   }
 }
 
-resource "docker_image" "shadowsocks" {
-  name = "ghcr.io/shadowsocks/ssserver-rust:v1.24.0"
+resource "docker_image" "xray" {
+  name = "ghcr.io/xtls/xray-core:25.12.8"
 }
 
-resource "docker_container" "shadowsocks" {
-  name    = "shadowsocks"
-  image   = docker_image.shadowsocks.image_id
+resource "docker_container" "xray" {
+  name    = "xray-reality"
+  image   = docker_image.xray.image_id
   restart = "unless-stopped"
   
-  # Isolated Network? 
-  # Actually, it needs NO network access to your other containers.
-  # It just needs to talk to the Internet.
-  # The default bridge is fine.
-
-  # Expose a RANDOM-looking port (e.g., 443, 8443, or 9000).
-  # If you use 443, it blends in with HTTPS traffic (very effective).
-  # BUT Traefik is using 443.
-  # Use 8443 or a high port like 51820 (Wireguard-ish).
+  # Expose port 443 (Active Masquerade)
+  # NOTE: You must disable Traefik on port 443 OR use a different port (e.g. 8443).
+  # Reality works best on 443, but 8443 is often okay.
   ports {
-    internal = 8388
-    external = 8443 # External Port you connect to
+    internal = 8443
+    external = 8443
     protocol = "tcp"
   }
   
-  # Also UDP for DNS tunneling
-  ports {
-    internal = 8388
-    external = 8443
-    protocol = "udp"
-  }
-
   volumes {
-    host_path      = "/opt/infra/shadowsocks/config.json"
-    container_path = "/config.json"
-    read_only      = true
-  }
-
-  command = [
-    "ssserver", "-c", "/config.json"
-  ]
-
-  lifecycle {
-    ignore_changes = [ pid_mode, ulimit ]
+    host_path      = "/opt/infra/xray/config.json"
+    container_path = "/etc/xray/config.json"
   }
 }
