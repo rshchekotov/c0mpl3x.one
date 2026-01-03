@@ -412,8 +412,8 @@ resource "docker_container" "traefik" {
     external = 80
   }
   ports {
-    internal = 8443
-    external = 8443
+    internal = 443
+    external = 443
   }
 
   volumes {
@@ -437,7 +437,7 @@ resource "docker_container" "traefik" {
     "--providers.docker=true",
     "--providers.docker.exposedbydefault=false",
     "--entrypoints.web.address=:80",
-    "--entrypoints.websecure.address=:8443",
+    "--entrypoints.websecure.address=:443",
     # Redirect HTTP -> HTTPS
     "--entrypoints.web.http.redirections.entrypoint.to=websecure",
     "--entrypoints.web.http.redirections.entrypoint.scheme=https",
@@ -465,13 +465,9 @@ resource "docker_container" "xray" {
   # NOTE: You must disable Traefik on port 443 OR use a different port (e.g. 8443).
   # Reality works best on 443, but 8443 is often okay.
   ports {
-    internal = 443
-    external = 443
+    internal = 8443
+    external = 8443
     protocol = "tcp"
-  }
-
-  capabilities {
-    add = ["NET_BIND_SERVICE"]
   }
   
   volumes {
