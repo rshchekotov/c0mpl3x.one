@@ -469,6 +469,10 @@ resource "docker_container" "xray" {
     external = 443
     protocol = "tcp"
   }
+
+  capabilities {
+    add = ["NET_BIND_SERVICE"]
+  }
   
   volumes {
     host_path      = "/opt/infra/xray/config.json"
