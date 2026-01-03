@@ -465,7 +465,7 @@ resource "docker_container" "xray" {
   # NOTE: You must disable Traefik on port 443 OR use a different port (e.g. 8443).
   # Reality works best on 443, but 8443 is often okay.
   ports {
-    internal = 443
+    internal = 8443
     external = 8443
     protocol = "tcp"
   }
