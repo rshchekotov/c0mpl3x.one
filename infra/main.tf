@@ -465,13 +465,17 @@ resource "docker_container" "xray" {
   # NOTE: You must disable Traefik on port 443 OR use a different port (e.g. 8443).
   # Reality works best on 443, but 8443 is often okay.
   ports {
-    internal = 8443
+    internal = 443
     external = 8443
     protocol = "tcp"
   }
   
   volumes {
     host_path      = "/opt/infra/xray/config.json"
-    container_path = "/etc/xray/config.json"
+    container_path = "/usr/local/etc/xray/config.json"
+  }
+
+  lifecycle {
+    ignore_changes = [ pid_mode, ulimit ]
   }
 }
